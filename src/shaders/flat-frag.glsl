@@ -43,17 +43,17 @@ void main() {
 	if(stripe > 1.0f && fs_Pos.y > 0.0f) {
 		out_Col += vec4(0.05, 0.1, 0.08, max(0.0f, fs_Pos.y)) * fs_Pos.y;
 	}
-	float star = pow(noise(noise(fs_Pos.y) * 323.433f * noise(fs_Pos.x)), 3.0f);
+  }
+ 
+  float star = pow(noise(noise(fs_Pos.y) * 323.433f * noise(fs_Pos.x)), 3.0f);
 	if(star > 0.999f) {
 	  	out_Col += vec4(0.7, 0.7, 0.6, max(0.0f, fs_Pos.y)) * fs_Pos.y;
   	}
 
   	if(star > 0.985f) {
-	  	out_Col += vec4(0.4, 0.4, 0.3, max(0.0f, fs_Pos.y)) * fs_Pos.y;
+	  	out_Col += vec4(0.4, 0.4, 0.3, max(0.0f, fs_Pos.y)) * abs(fs_Pos.y);
   	}
-  }
-  
-
+  	
   float zigzag = pow(noise(fs_Pos.x + 4.31 * fs_Pos.y), 3.0f);
   if(zigzag < 0.00001f) {
   	out_Col += vec4(0.5, 0.5, 0.3, max(0.0f, fs_Pos.y)) * .2f;

@@ -1,5 +1,5 @@
 #version 300 es
-#define cell_size 1.0f
+#define cell_size 8.0f
 
 uniform mat4 u_Model;
 uniform mat4 u_ModelInvTr;
@@ -88,22 +88,47 @@ float fbm2(float x, float y) {
 	return total;
 }
 
+float fbm2(vec2 p) {
+  float total = 0.0f;
+  float persistence = 0.5f;
+  int octaves = 8;
+
+  for(int i = 0; i < octaves; i++) {
+    float freq = pow(2.0f, float(i));
+    float amp = pow(persistence, float(i));
+
+    total += interpNoise2D(p.x * freq, p.y * freq) * amp;
+  }
+
+  return total;
+}
+
+float perturbedFbm(vec2 p)
+  {
+      vec2 q = vec2( fbm2( p + vec2(0.0,0.0) ),
+                     fbm2( p + vec2(4.8,-1.3) ) );
+
+      vec2 r = vec2( fbm2( p + 4.0*q + vec2(1.4,9.2) ),
+                     fbm2( p + 4.0*q + vec2(2.5,7.8) ) );
+
+      return fbm2( p + 4.0*r );
+  }
+
 
 vec2 generate_point(vec2 cell) {
-    vec2 p = vec2(cell.x * cell_size, cell.y * cell_size);
-    return p + fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)) * 43758.5453)));
+    vec2 p = vec2(cell.x, cell.y);
+    p += fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)) * 43758.5453)));
+    return p * cell_size;
 }
 
 float worleyNoise(vec2 pixel) {
-	pixel *= cell_size;
-
-    vec2 cell = floor(pixel);
+    vec2 cell = floor(pixel / cell_size);
 
     vec2 point = generate_point(cell);
 
     float shortest_distance = length(pixel - point);
 
-    // compute shortest distance from cell + neighboring cell points
+   // compute shortest distance from cell + neighboring cell points
 
     for(float i = -1.0f; i <= 1.0f; i += 1.0f) {
         float ncell_x = cell.x + i;
@@ -116,24 +141,22 @@ float worleyNoise(vec2 pixel) {
             // compare to previous distances
             float distance = length(pixel - npoint);
             if(distance < shortest_distance) {
-                shortest_distance = mix(distance, shortest_distance, pixel.x);
+                shortest_distance = distance;
             }
         }
     }
 
-    return -shortest_distance;
+    return shortest_distance / cell_size;
 }
 
-float cubeNoise(vec2 pixel) {
-	pixel *= cell_size;
-
-    vec2 cell = floor(pixel);
+vec2 worleyPoint(vec2 pixel) {
+    vec2 cell = floor(pixel / cell_size);
 
     vec2 point = generate_point(cell);
 
     float shortest_distance = length(pixel - point);
 
-    // compute shortest distance from cell + neighboring cell points
+   // compute shortest distance from cell + neighboring cell points
 
     for(float i = -1.0f; i <= 1.0f; i += 1.0f) {
         float ncell_x = cell.x + i;
@@ -146,13 +169,20 @@ float cubeNoise(vec2 pixel) {
             // compare to previous distances
             float distance = length(pixel - npoint);
             if(distance < shortest_distance) {
-                shortest_distance = mix(distance, shortest_distance, pixel.x);
+                shortest_distance = distance;
+                point = npoint;
             }
         }
     }
 
-    return -shortest_distance;
+    return point;
 }
+
+vec3 smoothstep3(vec3 edge0, vec3 edge1, vec3 v) {
+  return vec3(smoothstep(edge0.x, edge1.x, v.x),
+              smoothstep(edge0.y, edge1.y, v.y),
+              smoothstep(edge0.z, edge1.z, v.z));
+} 
 
 float sawtooth_wave(float x, float freq, float amplitude) {
 	return (x * freq - floor(x * freq)) * amplitude;
@@ -162,11 +192,32 @@ void main()
 {
 
   fs_Sine = (sin((vs_Pos.x + u_PlanePos.x) * 3.14159 * 0.1) + cos((vs_Pos.z + u_PlanePos.y) * 3.14159 * 0.1));
-  //vec4 modelposition = vec4(vs_Pos.x, 5.0f * fbm(vs_Pos.z + fs_Sine), vs_Pos.z, 1.0); // weird waves
+  
+  // Calculate initial mountains.
   vec4 modelposition = vec4(0.5 * vs_Pos.x + .4f * fbm(vs_Pos.x), 0.8 * pow(fbm2(0.05 * vs_Pos.x + u_PlanePos.x, 0.1 * vs_Pos.z + u_PlanePos.y), 6.0f), vs_Pos.z, 1.0);
-  //vec4 modelposition = vec4(vs_Pos.x, u_PlanePos.y + fbm(worleyNoise(vec2(fbm2(u_PlanePos.x, u_PlanePos.y), vs_Pos.z))), vs_Pos.z, 1.0);	
-  //vec4 modelposition = vec4(vs_Pos.x, vs_Pos.x + 3.0f * fs_Sine + sawtooth_wave(vs_Pos.x, 0.42f, 1.0f), vs_Pos.z, 1.0);
+
+  /*// Texture the mountains
+  vec4 newpos = modelposition + 0.07f * perturbedFbm(vec2(modelposition.y, modelposition.y));
+  if(modelposition.y > 0.0f) {
+    vec3 interp = mix(newpos.xyz, modelposition.xyz, modelposition.y);
+    modelposition += 0.6f * vec4(interp.x, interp.y, interp.z, 1.0f);
+  }
+  
+  // Deform for marsh-like streams
+  if(modelposition.y > 0.4f && modelposition.y < 0.78f) {
+    modelposition.y = 0.0f;
+  }
+
+  // Make plateaus
+  if(modelposition.y > 0.14f && modelposition.y < 2.0f) {
+    vec2 point = worleyPoint(modelposition.xz);
+    if(fbm2(point) > 0.9f) {
+      modelposition.y = 1.5f + (modelposition.y / .80f) * (worleyNoise(point) + random1(point, point));
+    }
+  }*/
+
   modelposition = u_Model * modelposition;
   gl_Position = u_ViewProj * modelposition;
   fs_Pos = modelposition.xyz;
+  
 }
