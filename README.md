@@ -49,3 +49,19 @@ Since the standard shape of the FBM function showed fairly obviously throughthe 
 Since the pools of water were also fairly straightforward in appearance, I took all terrain that fell between a chosen height threshold and manually flattened them into rivers. This formed streams that followed the outline of the land while leaving some smaller strips of land for a somewhat marsh-like appearance.
 
 ![](terrain03.png)
+
+These strips of land were further broken up by using worley noise to generate cell-like holes within the terrain at random.
+
+![](terrain04.png)
+
+Everything else remaining has been accomplished by the fragment shader. I interpolated the perturbed FBM with the base colors to give the mountains a striated appearance, manipulating the domain until the stripes fell along the mountains in a satisfactory way.
+
+![](terrain05.png)
+
+I then played with the transition between the landmasses and the larger pools of water, where I linearly interpolated between the original color and a purplish hue, based on the height of the terrain, to get a stylistic glow around the coast lines.
+
+![](terrain06.png)
+
+Finally, I linearly blended the water with the white, again based on the terrain's height, to get a sea-foam effect in the main pools of water.
+
+![](terrain07.png)

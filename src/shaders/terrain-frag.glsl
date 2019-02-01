@@ -103,6 +103,7 @@ void main()
 
 	out_Col = vec4(out_Col.rgb / smoothstep(0.1f, 0.3f, fs_Pos.y), 1.0f);
 
+	// color sealine
 	if(out_Col.b > 0.7f) {
 		out_Col = vec4(mix(vec3(131.0f, 37.0f, 150.0f)/255.0f, out_Col.rgb / 4.0f, fs_Pos.y / 0.7f), 1.0f);
 	}
