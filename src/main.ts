@@ -13,7 +13,7 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 const controls = {
   seaLevel: 0,
   riverStart: 0.4,
-  riverEnd: 0.75,
+  riverEnd: 0.78,
   'Load Scene': loadScene, // A function pointer, essentially
 };
 
@@ -84,9 +84,9 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  gui.add(controls, 'seaLevel', 0, 10).step(0.5);
-  gui.add(controls, 'riverStart', 0, 1).step(0.1);
-  gui.add(controls, 'riverEnd', 0, 5).step(0.25);
+  gui.add(controls, 'seaLevel', 0, 10).step(0.25);
+  gui.add(controls, 'riverStart', 0, 10).step(0.25);
+  gui.add(controls, 'riverEnd', 0, 10).step(0.25);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -144,12 +144,13 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     processKeyPresses();
+
     renderer.render(camera, lambert, [
       plane,
-    ]);
+    ], controls.seaLevel, controls.riverStart, controls.riverEnd);
     renderer.render(camera, flat, [
       square,
-    ]);
+    ], 0, 0, 0);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

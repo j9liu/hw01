@@ -30,6 +30,9 @@ class ShaderProgram {
   unifViewProj: WebGLUniformLocation;
   unifColor: WebGLUniformLocation;
   unifPlanePos: WebGLUniformLocation;
+  unifSeaLevel: WebGLUniformLocation;
+  unifRiverStart: WebGLUniformLocation;
+  unifRiverEnd: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -49,6 +52,9 @@ class ShaderProgram {
     this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifPlanePos   = gl.getUniformLocation(this.prog, "u_PlanePos");
+    this.unifSeaLevel   = gl.getUniformLocation(this.prog, "u_SeaLevel");
+    this.unifRiverStart = gl.getUniformLocation(this.prog, "u_RiverStart");
+    this.unifRiverEnd   = gl.getUniformLocation(this.prog, "u_RiverEnd");
   }
 
   use() {
@@ -83,6 +89,27 @@ class ShaderProgram {
     this.use();
     if (this.unifPlanePos !== -1) {
       gl.uniform2fv(this.unifPlanePos, pos);
+    }
+  }
+
+  setSeaLevel(amt: number) {
+    this.use();
+    if (this.unifSeaLevel !== -1) {
+      gl.uniform1f(this.unifSeaLevel, amt);
+    }
+  }
+
+  setRiverStart(amt: number) {
+    this.use();
+    if (this.unifRiverStart !== -1) {
+      gl.uniform1f(this.unifRiverStart, amt);
+    }
+  }
+
+  setRiverEnd(amt: number) {
+    this.use();
+    if (this.unifRiverEnd !== -1) {
+      gl.uniform1f(this.unifRiverEnd, amt);      
     }
   }
 

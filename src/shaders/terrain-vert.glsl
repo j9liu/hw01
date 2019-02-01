@@ -6,6 +6,11 @@ uniform mat4 u_ModelInvTr;
 uniform mat4 u_ViewProj;
 uniform vec2 u_PlanePos; // Our location in the virtual world displayed by the plane
 
+// Customizable variables
+uniform float u_SeaLevel;
+uniform float u_RiverStart;
+uniform float u_RiverEnd;
+
 in vec4 vs_Pos;
 in vec4 vs_Nor;
 in vec4 vs_Col;
@@ -197,18 +202,19 @@ void main()
   }
   
   // Deform for marsh-like streams
-  if(modelposition.y > 0.25f && modelposition.y < 0.5f) {
-    modelposition.y = 0.0f;
+  if(modelposition.y > u_RiverStart && modelposition.y < u_RiverEnd) {
+    modelposition.y = u_SeaLevel;
   }
 
 
   // Make holes
-  if(modelposition.y > 0.14f && modelposition.y < 2.0f) {
+  if(modelposition.y > 0.14f + u_RiverStart && modelposition.y < 2.0f + u_RiverEnd) {
     vec2 point = worleyPoint(modelposition.xz);
     if(noise(point.x + point.y) < 0.6f) {
       modelposition.y = 1.5f * (modelposition.y /.80f) * (worleyNoise(point) + random1(point, point));
     }
   }
+  modelposition.y = max(modelposition.y, u_SeaLevel);
 
   modelposition = u_Model * modelposition;
   gl_Position = u_ViewProj * modelposition;

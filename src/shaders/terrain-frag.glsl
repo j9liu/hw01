@@ -4,6 +4,9 @@ precision highp float;
 
 uniform vec2 u_PlanePos; // Our location in the virtual world displayed by the plane
 
+// Changeable
+uniform float u_SeaLevel;
+
 in vec3 fs_Pos;
 in vec4 fs_Nor;
 in vec4 fs_Col;
@@ -109,7 +112,9 @@ void main()
 	}
 
 	// color "water"
-	if(fs_Pos.y < 0.1f) {
+	if(u_SeaLevel > 0.0 && abs(fs_Pos.y - u_SeaLevel) < 0.00001) {
+		out_Col.rgb = vec3(100.0f, 170.0f, 131.0f) / 255.0f;
+	} else if (fs_Pos.y < 0.1) {
 		out_Col.rgb = mix(vec3(100.0f, 170.0f, 131.0f) / 255.0f, vec3(1.f, 1.f, 1.f), fs_Pos.y * 10.0);
 	}
 
