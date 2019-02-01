@@ -1,5 +1,5 @@
 #version 300 es
-#define cell_size 8.0f
+#define cell_size 1.0f
 
 uniform mat4 u_Model;
 uniform mat4 u_ModelInvTr;
@@ -178,16 +178,6 @@ vec2 worleyPoint(vec2 pixel) {
     return point;
 }
 
-vec3 smoothstep3(vec3 edge0, vec3 edge1, vec3 v) {
-  return vec3(smoothstep(edge0.x, edge1.x, v.x),
-              smoothstep(edge0.y, edge1.y, v.y),
-              smoothstep(edge0.z, edge1.z, v.z));
-} 
-
-float sawtooth_wave(float x, float freq, float amplitude) {
-	return (x * freq - floor(x * freq)) * amplitude;
-}
-
 void main()
 {
 
@@ -196,25 +186,29 @@ void main()
   // Calculate initial mountains.
   vec4 modelposition = vec4(0.5 * vs_Pos.x + .4f * fbm(vs_Pos.x), 0.8 * pow(fbm2(0.05 * vs_Pos.x + u_PlanePos.x, 0.1 * vs_Pos.z + u_PlanePos.y), 6.0f), vs_Pos.z, 1.0);
 
-  /*// Texture the mountains
-  vec4 newpos = modelposition + 0.07f * perturbedFbm(vec2(modelposition.y, modelposition.y));
-  if(modelposition.y > 0.0f) {
-    vec3 interp = mix(newpos.xyz, modelposition.xyz, modelposition.y);
-    modelposition += 0.6f * vec4(interp.x, interp.y, interp.z, 1.0f);
+  // Texture the mountains
+  if(modelposition.y > 0.6f) {
+    vec4 gradient = normalize(vec4((0.5 * (vs_Pos.x - 0.05) + 0.4 * fbm(vs_Pos.x - 0.05))
+                         - (0.5 * (vs_Pos.x + 0.05) + 0.4 * fbm(vs_Pos.x + 0.05)),
+                         (0.8 * pow(fbm2(0.05 * (vs_Pos.x + u_PlanePos.x - 0.05f), 0.1 * (vs_Pos.z + u_PlanePos.y - 0.05f)), 6.0f)) - 
+                         (0.8 * pow(fbm2(0.05 * (vs_Pos.x + u_PlanePos.x + 0.05), 0.1 * (vs_Pos.z + u_PlanePos.y + 0.05)), 6.0f)),
+                          -0.1f, 0.0f));
+      modelposition += 0.8 * gradient * perturbedFbm(vec2(modelposition.y, modelposition.y));
   }
   
   // Deform for marsh-like streams
-  if(modelposition.y > 0.4f && modelposition.y < 0.78f) {
+  if(modelposition.y > 0.25f && modelposition.y < 0.5f) {
     modelposition.y = 0.0f;
   }
 
-  // Make plateaus
+
+  // Make holes
   if(modelposition.y > 0.14f && modelposition.y < 2.0f) {
     vec2 point = worleyPoint(modelposition.xz);
-    if(fbm2(point) > 0.9f) {
-      modelposition.y = 1.5f + (modelposition.y / .80f) * (worleyNoise(point) + random1(point, point));
+    if(noise(point.x + point.y) < 0.6f) {
+      modelposition.y = 1.5f * (modelposition.y /.80f) * (worleyNoise(point) + random1(point, point));
     }
-  }*/
+  }
 
   modelposition = u_Model * modelposition;
   gl_Position = u_ViewProj * modelposition;

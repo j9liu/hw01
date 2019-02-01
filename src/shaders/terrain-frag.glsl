@@ -99,12 +99,7 @@ void main()
 	float t = clamp(smoothstep(40.0, 50.0, length(fs_Pos)), 0.0, 1.0); // Distance fog
 	
 	// color mountains
-	out_Col = vec4(mix(vec3(119.0f, 46.0f, 84.0f) / 255.0f, vec3(204.0f, 80.0f, 53.0f) / 255.0f, fs_Pos.y / 10.0f), 1.0f);
-
-	/*float max = max(out_Col.r, max(out_Col.g, out_Col.b));
-	if(max > 1.0f) {
-		out_Col / max;
-	}
+	out_Col = vec4(perturbedFbm(fs_Pos.xz / max(fs_Pos.y, 4.0f)) * mix(vec3(119.0f, 46.0f, 84.0f) / 255.0f, vec3(204.0f, 80.0f, 53.0f) / 255.0f, fs_Pos.y / 10.0f), 1.0f);
 
 	out_Col = vec4(out_Col.rgb / smoothstep(0.1f, 0.3f, fs_Pos.y), 1.0f);
 
@@ -114,7 +109,7 @@ void main()
 
 	// color "water"
 	if(fs_Pos.y < 0.1f) {
-		out_Col.rgb = mix(vec3(100.0f, 170.0f, 131.0f) / 255.0f, vec3(1.f, 1.f, 1.f), fs_Pos.y * 10.f);
-	}*/
+		out_Col.rgb = mix(vec3(100.0f, 170.0f, 131.0f) / 255.0f, vec3(1.f, 1.f, 1.f), fs_Pos.y * 10.0);
+	}
 
 }
