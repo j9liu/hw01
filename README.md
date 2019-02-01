@@ -38,7 +38,7 @@ Layering all of these effects on one another produces the stylistic night sky in
 
 # Terrain Features
 
-The terrain is meant to simulate a rocky, alien-esque landscape with its own (suspiciously colored) "water." I began with a typical 2D FBM function, which I then raised to an arbitrary exponent in order achieve mountains that towered notably over low-ranged areas. The base color of the mountains was achieved by linearly interpolating between a purple and orange hue, based on the height, while areas corresponding to the "water" were colored based on being below a height threshold.
+The terrain is meant to simulate a rocky, alien-esque landscape with its own bodies of "water." I began with a typical 2D FBM function, which I then raised to an arbitrary exponent in order achieve mountains that towered notably over low-ranged areas. The base color of the mountains was achieved by linearly interpolating between a purple and orange hue, based on the height, while areas corresponding to the "water" were colored based on being below a height threshold.
 
 ![](terrain01.png)
 
@@ -62,6 +62,6 @@ I then played with the transition between the landmasses and the larger pools of
 
 ![](terrain06.png)
 
-Finally, I linearly blended the water with the white, again based on the terrain's height, to get a sea-foam effect in the main pools of water.
+Finally, I linearly blended the water with the white, again based on the terrain's height, to get a sea-foam effect in the main pools of water and provide some interesting contrast with the clear streams.
 
 ![](terrain07.png)
