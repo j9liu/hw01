@@ -120,16 +120,16 @@ function main() {
   function processKeyPresses() {
     let velocity: vec2 = vec2.fromValues(0,0);
     if(wPressed) {
-      velocity[1] += 1.0;
+      velocity[1] += 0.4;
     }
     if(aPressed) {
-      velocity[0] += 1.0;
+      velocity[0] += 0.4;
     }
     if(sPressed) {
-      velocity[1] -= 1.0;
+      velocity[1] -= 0.4;
     }
     if(dPressed) {
-      velocity[0] -= 1.0;
+      velocity[0] -= 0.4;
     }
     let newPos: vec2 = vec2.fromValues(0,0);
     vec2.add(newPos, velocity, planePos);
